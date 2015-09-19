@@ -9,6 +9,7 @@ import os
 from os import path
 from os import getenv
 from uuid import uuid4
+from random import sample
 
 import pathlib
 from arrow import now
@@ -22,6 +23,7 @@ from ellis_island.utils.smartopen import prefix_path_from_uri, ParseUri
 
 
 from superserial import SQLStash, file_stash, Gula
+from superserial.stashtofile import S3FileStashPool
 
 # Imports for script portion.
 import click
@@ -31,20 +33,6 @@ import logging
 LOG = logging.getLogger(__name__)
 LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
 \t%(message)s'
-
-
-import traceback
-import warnings
-import sys
-
-
-def warn_with_traceback(message, category, filename,
-                        lineno, file=None, line=None):
-    traceback.print_stack()
-    log = file if hasattr(file, 'write') else sys.stderr
-    log.write(warnings.formatwarning(message, category, filename, lineno, line))
-
-warnings.showwarnings = warn_with_traceback
 
 
 PROJECT = unicode(uuid4()).split('-')[0]
@@ -63,6 +51,8 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
               help='Where to store the out put data files. A uri.')
 @click.option('-n', default=0, type=int,
               help='Number of files to use. If 0, it will use all found files.')
+@click.option('--randsmpl/--no-randsmpl', default=True,
+              help="If True, pick a random sub sample.")
 @click.option('-c', default=3,
               help='The number of parallel processes. If 1, will run linear.')
 @click.option('--project', default=PROJECT,
@@ -84,10 +74,17 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
               help="Skips docs that raise errors.")
 @click.option('--log', default='/mnt/logs/ellis_island.log',
               help='The full filename for the log file.')
+@click.option('-ioc', default=1, type=int,
+              help='The number of parallel IO processes. If 1, will run linear.')
+@click.option('-iot', default=1, type=int,
+              help='The number of IO threads. If 1, no threads will be used.')
+@click.option('-iob', default=200, type=int,
+              help='The IO batch size.')
 def main(inputdir,
          meta,
          datafile,
          n,
+         randsmpl,
          c,
          project,
          metatable,
@@ -97,7 +94,10 @@ def main(inputdir,
          kmsencrypt,
          kmskeyid,
          dontstop,
-         log):
+         log,
+         ioc,
+         iot,
+         iob):
     starttime = now()
     count = n  # TODO (steven_c) clean this up
     vcores = c
@@ -125,12 +125,16 @@ def main(inputdir,
     # --
     # IO
     emaillist = list(misc.spelunker_gen(inputdir))
-    LOG.info(len(emaillist))
     # --
     # Proc
     if not count:
-        count = len(emaillist)
-    emlsmpl = emaillist[0:count]
+        emlsmpl = emaillist
+    elif randsmpl:
+        emlsmpl = sample(emaillist, count)
+    else:
+        emlsmpl = emaillist[0:count]
+    LOG.info('Population size:\t' + str(len(emaillist)))
+    LOG.info('Sample size:\t' + str(len(emlsmpl)))
     batchsize = 50
     prefix = prefix_path_from_uri(datafile)
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
@@ -163,21 +167,33 @@ def main(inputdir,
             outrootrawobj.mkdir(parents=True)
     # dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
 
-    sdbase.default_create_table_sqlalchemy(meta, tablename=metatable)
-    stashobjdict = {'meta': SQLStash(uri=meta, table=metatable),
+    iogenargs = {'encrypt': encrypt,
+                 'encryptkey': encryptkey,
+                 'kmsencrypt': kmsencrypt,
+                 'kmskeyid': kmskeyid,
+                 }
+    if iot > 1:
+        iogenargs.update({'pool': True,
+                          'threads': iot,
+                          'vcores': ioc,
+                          'batch': iob,
+                          })
+    # sdbase.default_create_table_sqlalchemy(meta, tablename=metatable)
+    stashobjdict = {  # 'meta': SQLStash(uri=meta, table=metatable),
                     'text': file_stash(parenturi=outroottext,
-                                       encrypt=encrypt,
-                                       encryptkey=encryptkey,
-                                       kmsencrypt=kmsencrypt,
-                                       kmskeyid=kmskeyid),
+                                       **iogenargs),
                     'raw': file_stash(parenturi=outrootraw,
-                                      encrypt=encrypt,
-                                      encryptkey=encryptkey,
-                                      kmsencrypt=kmsencrypt,
-                                      kmskeyid=kmskeyid),
+                                      **iogenargs),
                     }
     chomp = Gula(**stashobjdict)
-    chomp.consume(respackiter)
+
+    def rm_meta(rpackiter):
+        for pack in rpackiter:
+            pack.pop('meta')
+            yield pack
+
+    rpckitr = rm_meta(respackiter)
+    chomp.consume(rpckitr)
     LOG.info('\t'.join(['VCores:',
                         str(vcores),
                         ]))

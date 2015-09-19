@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 import pickle
 import json
-
+from collections import Iterable
 import sys
 import os
 from os import environ
@@ -36,6 +36,44 @@ if sys.version_info[0] < 3:
     _STRINGTYPES = (basestring,)
 else:
     _STRINGTYPES = (str, bytes)
+
+
+# Try to make the flatten funcs suck a little less; too many loops and what not.
+def flatten_dict_tree(dicttree, __keypath=u''):
+    """
+    Flattens only the dicts in a dict tree.
+    """
+    newdict = {}
+    for key, value in dicttree.items():
+        fullkeypath = __keypath + '-' + key
+        if isinstance(value, dict):
+            newdict.update(flatten_dict_tree(value, fullkeypath))
+        else:
+            newdict[key] = value
+    return newdict
+
+
+def flatten_array_like_strct_gen(arraything, dictvalues=False):
+    try:
+        for i in arraything:
+            if isinstance(i, _STRINGTYPES):
+                yield i
+            elif isinstance(i, dict):
+                if dictvalues:
+                    g = flatten_array_like_strct_gen(flatten_dict_tree(i).values(),
+                                                     dictvalues=dictvalues)
+                    for j in g:
+                        yield j
+                else:
+                    yield i
+            elif isinstance(i, Iterable):
+                for j in flatten_array_like_strct_gen(i,
+                                                      dictvalues=dictvalues):
+                    yield j
+            else:
+                yield i
+    except TypeError:
+        yield arraything
 
 
 # ------------------------------------------------------------------------------

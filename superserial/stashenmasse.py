@@ -135,12 +135,14 @@ class Gula(object):
 
     def consume(self, *datumiter, **xargs):
         queue = self._sort_iterables(*datumiter, **xargs)
+        I = 0  # Hack to fix 'i' scope issue
         for i, datumdict in enumerate(queue):
             self.stash(datumdict=datumdict)
             if not i % 100:
                 LOG.info('DatumsIterd:\t' + str(i))
+            I = i
         if len(datumiter):
-            LOG.info('DatumsIterd:\t' + str(i))
+            LOG.info('DatumsIterd:\t' + str(I))
 
     def close(self):
         self._io_negotiator_close()
