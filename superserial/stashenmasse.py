@@ -24,7 +24,7 @@ def _io_negotiator_make(stashobjdict, **xargs):
         stashobjdict[datumtype].stash(datum, **xargs)
 
     def io_negotiator_close(**xargs):
-        for i, stashobjtype, stashobj in enumerate(stashobjdict.items()):
+        for stashobjtype, stashobj in stashobjdict.items():
             LOG.debug(str(stashobjtype) + " is now closed.")
             stashobj.close(**xargs)
 
