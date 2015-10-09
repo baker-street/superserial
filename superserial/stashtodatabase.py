@@ -59,9 +59,11 @@ class SQLStash(object):
                     self.tbl.create_index(columns=ic)
         self.stack = []
 
-    def flush_the_stack(self):
+    def flush_the_stack(self, chunk_size=None):
+        if not chunk_size:
+            chunk_size = self.chuncksize
         self.tbl.insert_many(rows=self.stack,
-                             chunk_size=self.chuncksize)
+                             chunk_size=chunk_size)
         self.conn.commit()
         self.conn.begin
         self.stack = []
@@ -72,7 +74,8 @@ class SQLStash(object):
             self.flush_the_stack()
 
     def close(self):
-        self.flush_the_stack()
+        stacksize = len(self.stack)
+        self.flush_the_stack(chunk_size=stacksize)
         self.conn.commit()
 
     def __enter__(self):
