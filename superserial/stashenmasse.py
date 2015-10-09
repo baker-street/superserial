@@ -24,7 +24,8 @@ def _io_negotiator_make(stashobjdict, **xargs):
         stashobjdict[datumtype].stash(datum, **xargs)
 
     def io_negotiator_close(**xargs):
-        for stashobjtype, stashobj in stashobjdict.items():
+        for i, stashobjtype, stashobj in enumerate(stashobjdict.items()):
+            LOG.debug(str(stashobjtype) + " is now closed.")
             stashobj.close(**xargs)
 
     return io_negotiator_stash, io_negotiator_close
@@ -144,6 +145,7 @@ class Gula(object):
             LOG.info('DatumsIterd:\t' + str(i))
 
     def close(self):
+        LOG.debug('Gura has now closed')
         self._io_negotiator_close()
 
     def __enter__(self):

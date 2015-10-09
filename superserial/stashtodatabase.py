@@ -20,7 +20,7 @@ from superserial.utils import get_default_data_key
 class SQLStash(object):
     def __init__(self, uri,
                  table=getenv('METADATA_TABLE_NAME', 'metadata'),
-                 chuncksize=500,
+                 chuncksize=20,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
                  # TODO (steven_c) consider removeing
                  index=False, indexcolumns=[['id', 'type'],
@@ -74,7 +74,7 @@ class SQLStash(object):
             self.flush_the_stack()
 
     def close(self):
-        stacksize = len(self.stack)
+        stacksize = len(self.stack) / 2
         self.flush_the_stack(chunk_size=stacksize)
         self.conn.commit()
 
