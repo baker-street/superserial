@@ -31,7 +31,7 @@ def _io_negotiator_make(stashobjdict, **xargs):
 
 
 class EnMasseStash(object):
-    def __init__(self, stashobjdict, keystoignore={'uuid'}, **xargs):
+    def __init__(self, stashobjdict, keystoignore={'id'}, **xargs):
         # TODO (steven_c) consider handling the encrypt key through xargs.
         io_neg_stash, io_neg_close = _io_negotiator_make(stashobjdict,
                                                          **xargs)
@@ -108,7 +108,7 @@ class Gula(object):
         io_neg_stash, io_neg_close = _io_negotiator_make(stash_objs)
         self._io_negotiator_stash = io_neg_stash
         self._io_negotiator_close = io_neg_close
-        self.keystoignore = {'uuid'}
+        self.keystoignore = {'id'}
         self._repr = 'Gula(' + repr(stash_objs) + ')'
 
         for k, v in stash_objs.items():

@@ -23,11 +23,11 @@ class SQLStash(object):
                  chuncksize=500,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
                  # TODO (steven_c) consider removeing
-                 index=False, indexcolumns=[['uuid', 'type'],
-                                            ['uuid', 'generation'],
-                                            ['uuid', 'parent'],
-                                            ['uuid', 'use'],
-                                            ['uuid'],
+                 index=False, indexcolumns=[['id', 'type'],
+                                            ['id', 'generation'],
+                                            ['id', 'parent'],
+                                            ['id', 'use'],
+                                            ['id'],
                                             ['type'],
                                             ['parent'],
                                             ['use'],
@@ -49,7 +49,7 @@ class SQLStash(object):
             self.tbl = self.conn.load_table(self.table)
         except NoSuchTableError:
             self.tbl = self.conn.get_table(self.table,
-                                           primary_id='uuid',
+                                           primary_id='id',
                                            primary_type='String(36)')
         if bool(self.index) and bool(self.indexcolumns):
             if isinstance(self.indexcolumns[0], basestring):
