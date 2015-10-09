@@ -174,3 +174,18 @@ def get_default_data_key(fpath=''.join([environ['HOME'],
             return [i for i in keyfile.readlines()][0].replace('\n', '')
     except(IOError):
         return None
+
+
+def load_n_stream_docdicts_w_id(docpaths):
+    for i, dpath in enumerate(docpaths):
+        docdict = json_load(dpath)
+        try:
+            docdict['id']
+        except KeyError:
+            docid = dpath.split('/')[-1].split('.')[0]
+            if not i % 50:
+                LOG.debug('DocID: ' + str(docid))
+            docdict['id'] = docid
+        if not bool(docdict['id']):
+            raise ValueError('docid is null: ' + str(docdict['id']))
+        yield docdict
