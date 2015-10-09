@@ -7,6 +7,8 @@ __copyright__ = "superserial  Copyright (C) 2015  Steven Cutting"
 from . import(__title__, __version__, __status__, __license__, __maintainer__,
               __email__)
 
+import logging
+LOG = logging.getLogger(__name__)
 
 from os import getenv
 
@@ -74,6 +76,7 @@ class SQLStash(object):
             self.flush_the_stack()
 
     def close(self):
+        LOG.debug('SQLStash, close has been called')
         stacksize = len(self.stack) / 2
         self.flush_the_stack(chunk_size=stacksize)
         self.conn.commit()
@@ -82,4 +85,5 @@ class SQLStash(object):
         return self
 
     def __exit__(self, type, value, traceback):
+        LOG.debug('SQLStash, exit has been called')
         self.close()

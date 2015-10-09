@@ -152,6 +152,7 @@ class Gula(object):
         return self
 
     def __exit__(self, type, value, traceback):
+        LOG.debug('Gura, exit has been called.')
         self.close()
 
     def __repr__(self):
