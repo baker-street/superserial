@@ -20,6 +20,12 @@ from os import environ
 import tempfile
 import shutil
 import subprocess
+from uuid import uuid4
+import time
+import datetime
+
+from dataset import connect
+import pathlib
 
 import yaml
 try:
@@ -28,14 +34,65 @@ except ImportError:
     LOG.error('Library cryptography not installed, ' +
               'encryption will not be possible')
 
-
-# ------------------------------------------------------------------------------
-# Misc
+from superserial.outsidemodules.smartopen import ParseUri
 
 if sys.version_info[0] < 3:
     _STRINGTYPES = (basestring,)
 else:
     _STRINGTYPES = (str, bytes)
+
+
+DEFAULTDB = os.getenv('DATABASE_URL')
+DEFAULTDB2 = os.getenv('DATABASE_URL2')
+
+
+# ------------------------------------------------------------------------------
+# Misc
+
+# ----------------------------------------
+# datetime
+def unix_epoch():
+    return unicode(int(time.time()))
+
+
+def epoch2datetime(epoch):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(epoch)))
+
+
+def datetime2epoch(dtime):
+    return dtime.strftime('%s')
+
+
+def utc_now():
+    """
+    current utc time
+    """
+    return datetime.datetime.utcnow()
+
+
+def now():
+    """
+    current time
+    """
+    return datetime.datetime.now()
+
+
+def utc_now_str():
+    return utc_now().strftime('%d-%m-%Y_%Hh%Mm')
+
+
+def now_str():
+    return now().strftime('%d-%m-%Y_%Hh%Mm')
+
+# ----------------------------------------
+
+
+def uuid4_8_char():
+    return unicode(uuid4()).split('-')[0]
+
+
+def uuid4_12_char():
+    return unicode(uuid4()).split('-')[-1]
 
 
 # Try to make the flatten funcs suck a little less; too many loops and what not.
@@ -155,6 +212,13 @@ class TempDir(object):
             shutil.rmtree(self.dirname)
 
 
+def check_n_prep_path(filepath):
+    if ParseUri(filepath).scheme in {'file'}:
+        filepathobj = pathlib.Path(filepath)
+        if not filepathobj.is_dir():
+            filepathobj.mkdir(parents=True)
+
+
 # ------------------------------------------------------------------------------
 # Misc. Utils
 
@@ -189,3 +253,37 @@ def load_n_stream_docdicts_w_id(docpaths):
         if not bool(docdict['id']):
             raise ValueError('docid is null: ' + str(docdict['id']))
         yield docdict
+
+
+FTRSETQUERY = "SELECT id,text_pointer FROM doc_metadata WHERE use = 't';"
+
+
+def load_n_stream_docdicts_w_id2(url,
+                                 q=FTRSETQUERY,
+                                 *_, **__):
+    conn = connect(url)
+    docs = ((doc['id'], json_load(doc['text_pointer']))
+            for doc in conn.query(q))
+    for docid, docdict in docs:
+        docdict['id'] = docid
+        yield docdict
+
+
+FTRSETQUERY = 'SELECT id,doc_id,feature_array FROM featureset WHERE n > 0 SORT BY doc_id;'
+
+
+def load_n_stream_feature_sets(url,
+                               q=FTRSETQUERY,
+                               *_, **__):
+    conn = connect(url)
+    ftrsets = ((ftrset['id'], ftrset['doc_id'], json_load(ftrset['feature_array']))
+               for ftrset in conn.query(q))
+    stack = []
+    _docid = ''
+    for ftrid, docid, ftrs in ftrsets:
+        if docid != _docid:
+            if stack:
+                yield _docid, stack
+                stack = []
+                _docid = docid
+        [stack.append(f) for f in ftrs]
