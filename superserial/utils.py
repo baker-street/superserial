@@ -27,6 +27,7 @@ import datetime
 from dataset import connect
 import pathlib
 
+import dill
 import yaml
 try:
     from cryptography.fernet import Fernet
@@ -169,6 +170,16 @@ def yaml_load(file_):
         return yaml.load(fp)
 
 
+def dill_save(obj, file_, indent=None):
+    with open(file_, 'w+') as fp:
+        dill.dump(obj, fp, indent=indent)
+
+
+def dill_load(file_):
+    with open(file_) as fp:
+        return dill.load(fp)
+
+
 # ------------------------------------------------------------------------------
 # File Utils
 
@@ -255,7 +266,7 @@ def load_n_stream_docdicts_w_id(docpaths):
         yield docdict
 
 
-FTRSETQUERY = "SELECT id,text_pointer FROM doc_metadata WHERE use = 't';"
+FTRSETQUERY = "SELECT id,text_pointer FROM document WHERE use = 't';"
 
 
 def load_n_stream_docdicts_w_id2(url,
