@@ -20,8 +20,8 @@ from superserial.utils import get_default_data_key
 
 
 class SQLStash(object):
-    def __init__(self, uri,
-                 table=getenv('METADATA_TABLE_NAME', 'metadata'),
+    def __init__(self, uri=getenv('DATABASE_URL'),
+                 table=getenv('STASH_TABLE_NAME'),
                  chuncksize=20,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
                  # TODO (steven_c) consider removeing
