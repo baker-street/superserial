@@ -26,7 +26,8 @@ import datetime
 
 from dataset import connect
 import pathlib
-
+from psycopg2 import connect as psyconnect
+from psycopg2.extras import DictCursor
 import dill
 import yaml
 try:
@@ -48,7 +49,15 @@ DEFAULTDB2 = os.getenv('DATABASE_URL2')
 
 
 # ------------------------------------------------------------------------------
-# Misc
+# PSQL
+
+
+def psql_query(query, params={}, url=DEFAULTDB):
+    with psyconnect(url) as con:
+        curs = con.cursor(cursor_factory=DictCursor)
+        curs.execute(query, params)
+        return [dict(r) for r in curs]
+
 
 # ----------------------------------------
 # datetime
