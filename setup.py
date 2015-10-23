@@ -35,6 +35,7 @@ setup(
     # zip_safe=False,
     install_requires=['pathlib',
                       'pyyaml',
+                      'dill',
                       'six',
                       'sqlalchemy',
                       'dataset',
