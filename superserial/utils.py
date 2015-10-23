@@ -269,7 +269,7 @@ def load_n_stream_docdicts_w_id(docpaths):
 FTRSETQUERY = "SELECT id,text_pointer FROM document WHERE use = 't';"
 
 
-def load_n_stream_docdicts_w_id2(url,
+def load_n_stream_docdicts_w_id2(url=DEFAULTDB,
                                  q=FTRSETQUERY,
                                  *_, **__):
     conn = connect(url)
