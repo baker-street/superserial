@@ -36,6 +36,8 @@ except ImportError:
     LOG.error('Library cryptography not installed, ' +
               'encryption will not be possible')
 
+from higherorder.utils import xargs_cndm
+
 from superserial.outsidemodules.smartopen import ParseUri
 
 if sys.version_info[0] < 3:
@@ -49,6 +51,15 @@ DEFAULTDB2 = os.getenv('DATABASE_URL2')
 
 
 # ------------------------------------------------------------------------------
+# Databases
+
+
+def dataset_find_cndm(*morekeys, **xargs):
+    defaultkeys = {'_limit', '_offset', '_step', 'order_by', 'return_count'}
+    return xargs_cndm(*defaultkeys.union(set(morekeys)), **xargs)
+
+
+# -------------------------------------
 # PSQL
 
 
@@ -59,7 +70,7 @@ def psql_query(query, params={}, url=DEFAULTDB):
         return [dict(r) for r in curs]
 
 
-# ----------------------------------------
+# ------------------------------------------------------------------------------
 # datetime
 def unix_epoch():
     return unicode(int(time.time()))
