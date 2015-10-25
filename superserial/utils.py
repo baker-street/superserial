@@ -116,6 +116,10 @@ def uuid4_12_char():
     return unicode(uuid4()).split('-')[-1]
 
 
+def uuid4_full_char():
+    return unicode(uuid4())
+
+
 # Try to make the flatten funcs suck a little less; too many loops and what not.
 def flatten_dict_tree(dicttree, __keypath=u''):
     """
