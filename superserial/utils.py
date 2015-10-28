@@ -24,7 +24,7 @@ from uuid import uuid4
 import time
 import datetime
 
-from dataset import connect
+from dataset import connect, Database
 import pathlib
 from psycopg2 import connect as psyconnect
 from psycopg2.extras import DictCursor
@@ -68,6 +68,11 @@ def psql_query(query, params={}, url=DEFAULTDB):
         curs = con.cursor(cursor_factory=DictCursor)
         curs.execute(query, params)
         return [dict(r) for r in curs]
+
+
+def dataset_query(table, url=DEFAULTDB, **xargs):
+    with Database(url=url) as db:
+        return (r for r in db[table].find(**xargs))
 
 
 # ------------------------------------------------------------------------------
