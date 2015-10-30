@@ -273,7 +273,7 @@ def get_user_name():
 
 
 def hash_many(*many):
-    return md5(''.join(*many)).hexdigest()
+    return md5(''.join(many)).hexdigest()
 
 
 def pass_through(stuff):
