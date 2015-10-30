@@ -24,6 +24,7 @@ from uuid import uuid4
 import time
 import datetime
 from getpass import getuser
+from hashlib import md5
 
 from dataset import connect, Database
 import pathlib
@@ -269,6 +270,10 @@ def get_user_name():
     uses getpass.getuser()
     """
     return getuser()
+
+
+def hash_many(*many):
+    return md5(''.join(*many)).hexdigest()
 
 
 def pass_through(stuff):
