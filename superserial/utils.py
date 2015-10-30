@@ -23,6 +23,7 @@ import subprocess
 from uuid import uuid4
 import time
 import datetime
+from getpass import getuser
 
 from dataset import connect, Database
 import pathlib
@@ -261,6 +262,14 @@ def check_n_prep_path(filepath):
 
 # ------------------------------------------------------------------------------
 # Misc. Utils
+
+
+def get_user_name():
+    """
+    uses getpass.getuser()
+    """
+    return getuser()
+
 
 def pass_through(stuff):
     return stuff
