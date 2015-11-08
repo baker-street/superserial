@@ -17,6 +17,7 @@ from collections import Iterable
 import sys
 import os
 from os import environ
+from subprocess import call
 import tempfile
 import shutil
 import subprocess
@@ -352,3 +353,17 @@ def load_n_stream_feature_sets(url,
 
 def text_to_less(text, cmd='less -R'):
     pydoc.pipepager(text, cmd=cmd)
+
+
+def edit_with_editor(text, editor='nano'):
+    EDITOR = os.environ.get('EDITOR', editor)
+    with tempfile.NamedTemporaryFile(suffix=".tmp") as tfile:
+        tfile.write(text)
+        tfile.flush()
+        call([EDITOR, tfile.name])
+        tfile.seek(0)
+        return tfile.read()
+
+
+def get_text_from_editor(editor='nano'):
+    return edit_with_editor(text='', editor=editor)
