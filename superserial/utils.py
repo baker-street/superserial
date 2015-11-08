@@ -25,6 +25,7 @@ import time
 import datetime
 from getpass import getuser
 from hashlib import md5
+import pydoc
 
 from dataset import connect, Database
 import pathlib
@@ -70,6 +71,12 @@ def psql_query(query, params={}, url=DEFAULTDB):
         curs = con.cursor(cursor_factory=DictCursor)
         curs.execute(query, params)
         return [dict(r) for r in curs]
+
+
+def psql_query_no_return(query, params={}, url=DEFAULTDB):
+    with psyconnect(url) as con:
+        curs = con.cursor(cursor_factory=DictCursor)
+        curs.execute(query, params)
 
 
 def dataset_query(table, url=DEFAULTDB, **xargs):
@@ -341,3 +348,7 @@ def load_n_stream_feature_sets(url,
                 stack = []
                 _docid = docid
         [stack.append(f) for f in ftrs]
+
+
+def text_to_less(text, cmd='less -R'):
+    pydoc.pipepager(text, cmd=cmd)
