@@ -351,7 +351,7 @@ def load_n_stream_feature_sets(url,
         [stack.append(f) for f in ftrs]
 
 
-def text_to_less(text, cmd='less -R'):
+def text_to_less(text, cmd='less -r -i'):
     pydoc.pipepager(text, cmd=cmd)
 
 
