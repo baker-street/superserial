@@ -16,6 +16,7 @@ import json
 from collections import Iterable
 import sys
 import os
+from os import path
 from os import environ
 from subprocess import call
 import tempfile
@@ -225,7 +226,7 @@ def dill_load(file_):
 def spelunker_gen(rootdir):
     for dirname, subdirlist, filelist in os.walk(rootdir):
         for fname in filelist:
-            yield '{}/{}'.format(dirname, fname)
+            yield path.join(dirname, fname)
 
 
 def file_tail(file_, n=1, dropstuff='\n', replacewith=''):
