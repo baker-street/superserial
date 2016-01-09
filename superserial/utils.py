@@ -318,11 +318,11 @@ def load_n_stream_docdicts_w_id(docpaths):
         yield docdict
 
 
-FTRSETQUERY = "SELECT id,text_pointer FROM document WHERE use = 't';"
+DOCPATHQUERY = "SELECT id,text_pointer FROM document WHERE use = 't';"
 
 
 def load_n_stream_docdicts_w_id2(url=DEFAULTDB,
-                                 q=FTRSETQUERY,
+                                 q=DOCPATHQUERY,
                                  *_, **__):
     conn = connect(url)
     docs = ((doc['id'], json_load(doc['text_pointer']))
