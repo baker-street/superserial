@@ -4,3 +4,4 @@
 *.sqlite
 *.swp
 *__pycache__*
+*.cache*
