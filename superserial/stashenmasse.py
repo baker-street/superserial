@@ -133,14 +133,14 @@ class Gula(object):
             LOG.info('DatumsIterd:\t' + str(i))
 
     def close(self):
-        LOG.debug('Gura has now closed')
+        LOG.debug('Gula has now closed')
         self._io_negotiator_close()
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
-        LOG.debug('Gura, exit has been called.')
+        LOG.debug('Gula, exit has been called.')
         self.close()
 
     def __repr__(self):
