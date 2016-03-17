@@ -12,7 +12,6 @@ LOG = logging.getLogger(__name__)
 
 from os import getenv
 
-# from six.moves.urllib.parse import urlsplit
 import dataset
 from sqlalchemy.exc import NoSuchTableError
 
@@ -25,16 +24,7 @@ class SQLStash(object):
                  chuncksize=20,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
                  # TODO (steven_c) consider removeing
-                 index=False, indexcolumns=[['id', 'type'],
-                                            ['id', 'generation'],
-                                            ['id', 'parent'],
-                                            ['id', 'use'],
-                                            ['id'],
-                                            ['type'],
-                                            ['parent'],
-                                            ['use'],
-                                            ['generation'],
-                                            ],
+                 index=False, indexcolumns=None,
                  **xargs):
         self.uri = uri
         self.chuncksize = chuncksize
