@@ -15,16 +15,31 @@ from cryptography.fernet import Fernet
 
 
 def spelunker_gen(rootdir):
+    """
+    Stream absolute paths of all files within a directory tree starting at 'rootdir'.
+    """
     for dirname, subdirlist, filelist in os.walk(rootdir):
         for fname in filelist:
             yield '{}/{}'.format(dirname, fname)
 
 
 def pass_through(stuff):
+    """
+    Identity function.
+
+    def pass_through(stuff):
+        return stuff
+    """
     return stuff
 
 
 def encrypt_it(content, key):
+    """
+    Encrypts 'content' using 'key' as the key.
+
+    This is a convenience function that wraps the Fernet class from the
+    cryptography package.
+    """
     print key
     ferob = Fernet(str(key))
     return ferob.encrypt(str(content))
@@ -32,6 +47,11 @@ def encrypt_it(content, key):
 
 def get_default_data_key(fpath=''.join([environ['HOME'],
                                         '/.defaultdatakey.txt'])):
+    """
+    Tries to load a key from a file at 'fpath'.
+
+    fpath default: ~/.defaultdatakey.txt
+    """
     try:
         with open(fpath) as keyfile:
             return [i for i in keyfile.readlines()][0].replace('\n', '')
