@@ -79,18 +79,6 @@ def _stash(datum, stashobjdict,
         stashobj.stash(datum)
 
 
-def kobayashi(datumiter, stashobjdict, njobs=2, chunksize=50, ordered=False,
-              **xargs):
-    """
-    stashobjdict - dict that holds the stashobjects.
-                   the key will be used to guide the packets.
-    """
-    stasher = partial(_stash, stashobjdict=stashobjdict, **xargs)
-    out = imap_easy(stasher, datumiter, n_jobs=njobs, chunksize=chunksize,
-                    ordered=ordered)
-    return out
-
-
 def _sort_iterables(*iters, **xargs):
     try:
         if xargs['swap']:
